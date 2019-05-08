@@ -10,6 +10,10 @@ import sys
 from audioop import add, mul
 
 class Echo:
+    def __init__(self):
+        self.flag_in = False
+        self.flag_out = False
+        
     def open(self, input_file):
         self.input_file = input_file
         self.wav = wave.open(input_file)
@@ -17,6 +21,49 @@ class Echo:
         if self.wav.getnchannels() == 2:
             raise Exception ('Arquivo stereo não suportado')
 
+        self.flag_in = True
+        self.flag_out = False
+
+    def getInputFileName(self):
+        if self.flag_in:
+            return self.input_file
+        return None
+
+    def getOutputFileName(self):
+        if self.flag_out:
+            return self.output_file
+        return None
+
+    def getInputAudio(self):
+        if self.flag_in:
+            return self.audio
+        return None
+
+    def getOutputAudio(self):
+        if self.flag_out:
+            return self.delayed_audio
+        return None
+
+    def getInputParams(self):
+        if self.flag_in:
+            return self.params
+        return None
+
+    def getOutputParams(self):
+        if self.flag_out:
+            return self.params
+        return None
+
+    def getInputAudioInfo(self):
+        if self.flag_in:
+            return self.input_file,self.params,self.audio
+        return None
+
+    def getOutputAudioInfo(self):
+        if self.flat_out:
+            return self.output_file,self.params,self.delayed_audio
+        return None
+    
     def play_input(self):
         playsound(self.input_file)
 
@@ -29,30 +76,43 @@ class Echo:
             self.params = wave_file.getparams()
             self.audio  = wave_file.readframes(frames)
 
-    def getAudioInfo(self):
-        return self.input_file,self.params.sampwidth,self.params.framerate,self.audio
-
     def printInputParams(self):
-        print("\n\tFile: {}".format(self.input_file),
+        if self.flag_in:
+            print("\n\tFile: {}".format(self.input_file),
               "\n\tBytes per sample: {}".format(self.params.sampwidth),
               "\n\tSamples per second: {}".format(self.params.framerate))
+        else:
+            print("Nenhum arquivo encontrado")
 
     def printInputBytes(self):
-        print("\n\tFile: {}".format(self.input_file),
+        if self.flag_in:
+            print("\n\tFile: {}".format(self.input_file),
               "\n\tAudio: {}".format(self.audio))
+        else:
+            print("Nenhum arquivo encontrado")
 
     def printOutputParams(self):
-        print("\n\tFile: {}".format(self.output_file),
+        if self.flag_out:
+            print("\n\tFile: {}".format(self.output_file),
               "\n\tBytes per sample: {}".format(self.params.sampwidth),
               "\n\tSamples per second: {}".format(self.params.framerate))
+        else:
+            print("Nenhum arquivo encontrado")
 
     def printOutputBytes(self):
-        print("\n\tFile: {}".format(self.output_file),
+        if self.flag_out:
+            print("\n\tFile: {}".format(self.output_file),
               "\n\tAudio: {}".format(self.delayed_audio))
+        else:
+            print("Nenhum arquivo encontrado")
 
     def delay(self, offset_ms = 1000, factor=1, num=1):
         """ 'num' delays depois de 'offset_ms' milissegundos amplificado por 'fator'. """
 
+        if self.flag_in == False:
+            print('Nenhum arquivo de audio encontrado')
+            return None
+        
         if factor > 1:
             print('O audio resultante terá um volume alto')
 
@@ -80,9 +140,21 @@ class Echo:
         return self.delayed_audio
 
     def output_wave(self, output_file):
+        if self.flag_in == False:
+            print ('Nenhum arquivo de audio encontrado')
+            return None
+        
         self.output_file = output_file
+        self.flag_out = True
         
         with wave.open(output_file,'wb') as wave_file:
             wave_file.setparams(self.params)
             wave_file.writeframes(self.delayed_audio)
-        
+
+    def generate_audioEcho(self, input_file, output_file, offset = 1000, factor = 1, num = 1):
+        self.open(input_file)
+        self.input_wave()
+        self.delay(offset, factor)
+        self.output_wave(output_file)
+
+        return self.delayed_audio
