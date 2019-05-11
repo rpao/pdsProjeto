@@ -1,12 +1,8 @@
-from echo import Echo
+from imagemBmp import BMP
 
-input_file = 'arquivos\sp04.wav'
-output_file = 'arquivos\sp04echo.wav'
+imagemName = "arquivos/lena_rings.bmp"
 
-offset = 500
-factor = 0.5
+imgBmp = BMP()
+img = imgBmp.openFile(imagemName)
 
-echo = Echo()
-echo.generate_audioEcho(input_file,output_file,offset, factor)
-echo.play_input()
-echo.play_output()
+print(img)
