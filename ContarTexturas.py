@@ -5,7 +5,7 @@ import numpy as np
 
 from sys import argv
 from PIL import Image
-from matplotlib import pyplot as plt
+## from matplotlib import pyplot as plt
 from scipy.ndimage.filters import gaussian_filter
 
 ## suavizar imagem
@@ -18,6 +18,9 @@ def detectarBordas(inputFile, outputFile, intensidadeP):
     img = Image.open(inputFile)
 
     width, height = img.size
+    
+##    width = int(width/10)
+##    height = int(height/10)
 
     newimg = Image.new("RGB", (width, height), "white")
 
@@ -129,39 +132,42 @@ def contarAreas(img):
 # https://medium.com/@lucashelal/detec%C3%A7%C3%A3o-e-contagem-da-%C3%A1rea-de-objetos-em-uma-imagem-bin%C3%A1ria-440759a7e034
 # https://medium.com/@enzoftware/how-to-build-amazing-images-filters-with-python-median-filter-sobel-filter-%EF%B8%8F-%EF%B8%8F-22aeb8e2f540
 
-sigma = 0.5
-lista_intensidadeP = [10,20,30,40,50,60,70,80,100]
+##lista_sigma = [0.1, 0.5, 1.0, 1.5, 2.0]
+##lista_intensidadeP = [10,20,30,40,50]
 
-intensidadeP = 20
+sigma = 0
+intensidadeP = 10
 
-#for intensidadeP in lista_intensidadeP:
 path = 'arquivos/alumgrns.bmp'
 path_suavizada = 'arquivos/P2/Q2/alumgrnsSuave.bmp'
-path_bordas = 'arquivos/P2/Q2/alumgrns_intensidade'+str(intensidadeP)+'.bmp'
+path_bordas = 'arquivos/P2/Q2/alumgrnsBordas.bmp'
 
-print('Aplicando suavizacao de ruidos')
-suavizarBordas(path, path_suavizada, sigma)
+##print('Aplicando suavizacao de ruidos')
+##suavizarBordas(path, path_suavizada, sigma)
+
+##print('Aplicando deteccao de bordas')
+##detectarBordas(path_suavizada, path_bordas, intensidadeP)
 
 print('Aplicando deteccao de bordas')
 detectarBordas(path_suavizada, path_bordas, intensidadeP)
 
 imgBordas = cv.imread(path_bordas, 0)
 
-#print('Aplicando conversao de imagem para Binario')
-#ret, imgT = cv.threshold(imgBordas, 127, 255, cv.THRESH_BINARY)
-
 print('Iniciar contagem de texturas')
 contarAreas(imgBordas);
 
-    ## mostrar imagens
-    #cv.imshow('original', imgBordas)
-    #cv.imshow('pintada', imgT)
+## mostrar imagens
+#cv.imshow('original', imgBordas)
+#cv.imshow('pintada', imgT)
 
-    #n,bins,patches = plt.hist(imgT.ravel(), 256, [1, 255])
-    #plt.show()
+#n,bins,patches = plt.hist(imgT.ravel(), 256, [1, 255])
+#plt.show()
 
-    #input("Continuar?")
+#input("Continuar?")
 
+## print('Aplicando conversao de imagem para Binario')
+## ret, imgT = cv.threshold(imgBordas, 127, 255, cv.THRESH_BINARY)
+##
 #### suavizar ruidos da imagem
 ##img = cv.imread(path_suavizada, 0)
 ##if (img == None):
