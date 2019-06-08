@@ -2,10 +2,7 @@ import math
 import imageio
 import cv2 as cv
 import numpy as np
-
-from sys import argv
 from PIL import Image
-## from matplotlib import pyplot as plt
 from scipy.ndimage.filters import gaussian_filter
 
 ## suavizar imagem
@@ -134,14 +131,16 @@ def contarAreas(img):
 # https://medium.com/@lucashelal/detec%C3%A7%C3%A3o-e-contagem-da-%C3%A1rea-de-objetos-em-uma-imagem-bin%C3%A1ria-440759a7e034
 # https://medium.com/@enzoftware/how-to-build-amazing-images-filters-with-python-median-filter-sobel-filter-%EF%B8%8F-%EF%B8%8F-22aeb8e2f540
 
-sigma = 0
+sigma = 1.5
 intensidadeP = 10
 
 path = 'arquivos/alumgrns.bmp'
-path_suavizada = 'arquivos/P2/Q2/alumgrnsSuave.bmp'
-path_bordas = 'arquivos/P2/Q2/alumgrnsBordas.bmp'
 
-print('Aplicando deteccao de bordas')
+
+## teste sem reducao de ruido
+path_bordas = 'arquivos/alumgrnsBordas.bmp'
+
+print('Aplicando deteccao de bordas em imagem sem reducao de ruido')
 detectarBordas(path, path_bordas, intensidadeP)
 
 imgBordas = cv.imread(path_bordas, 0)
@@ -149,4 +148,22 @@ imgBordas = cv.imread(path_bordas, 0)
 print('Iniciar contagem de texturas')
 totalAreas = contarAreas(imgBordas);
 
-print ('Total de Areas: '+str(totalAreas))
+print ('Total de Areas sem reducao de ruido: '+str(totalAreas))
+
+## teste com reducao de ruido
+lista_sigma = [0.5, 1.0, 1.5, 2]
+for sigma in lista_sigma:
+    path_suavizada = 'arquivos/alumgrnsSuave'+str(sigma).replace('.','')+'.bmp'
+    
+    print('Aplicando reducao de ruido sigma=',sigma)
+    suavizarBordas(path, path_suavizada, sigma)
+
+    print('Aplicando deteccao de bordas em imagem com reducao de ruido')
+    detectarBordas(path_suavizada, path_bordas, intensidadeP)
+
+    imgBordas = cv.imread(path_bordas, 0)
+
+    print('Iniciar contagem de texturas')
+    totalAreas = contarAreas(imgBordas);
+
+    print ('Total de Areas (sigma='+str(sigma)+'): '+str(totalAreas))
