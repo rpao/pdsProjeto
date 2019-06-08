@@ -18,9 +18,6 @@ def detectarBordas(inputFile, outputFile, intensidadeP):
     img = Image.open(inputFile)
 
     width, height = img.size
-    
-##    width = int(width/10)
-##    height = int(height/10)
 
     newimg = Image.new("RGB", (width, height), "white")
 
@@ -106,6 +103,7 @@ def bfs(img, ponto, cor, corBorda):
     i, j = ponto
     img[i][j] = cor
     fila = [ponto]
+    cont = 0
     while fila:
         x,y  = fila.pop()
         for vizinho in vizinhos(img, x, y):
@@ -114,26 +112,27 @@ def bfs(img, ponto, cor, corBorda):
             if(corVizinho < corBorda and corVizinho != cor):
                 img[xV][yV] = cor
                 fila.append(vizinho)
+        cont += 1
+    return cont
 
 ## Aplicar uma busca em largura para pixels que possui o nível da cor escolhida
 def contarAreas(img):
     pixelPintado = 5
     totalAreas = 0
     corBorda = 10
+    rangeArea = 50
     for i in range(len(img)):
         for j in range(len(img[i])):
             cor = img[i][j]
             if cor < corBorda and cor != pixelPintado:
-                totalAreas += 1
-                bfs(img,(i,j), pixelPintado, corBorda)
-            pixelPintado += 5
-    print ('Total de Areas: '+str(totalAreas))
+                cont = bfs(img,(i,j), pixelPintado, corBorda)
+                if cont > rangeArea:
+                    totalAreas += 1
+            pixelPintado = 5
+    return totalAreas
     
 # https://medium.com/@lucashelal/detec%C3%A7%C3%A3o-e-contagem-da-%C3%A1rea-de-objetos-em-uma-imagem-bin%C3%A1ria-440759a7e034
 # https://medium.com/@enzoftware/how-to-build-amazing-images-filters-with-python-median-filter-sobel-filter-%EF%B8%8F-%EF%B8%8F-22aeb8e2f540
-
-##lista_sigma = [0.1, 0.5, 1.0, 1.5, 2.0]
-##lista_intensidadeP = [10,20,30,40,50]
 
 sigma = 0
 intensidadeP = 10
@@ -142,62 +141,12 @@ path = 'arquivos/alumgrns.bmp'
 path_suavizada = 'arquivos/P2/Q2/alumgrnsSuave.bmp'
 path_bordas = 'arquivos/P2/Q2/alumgrnsBordas.bmp'
 
-##print('Aplicando suavizacao de ruidos')
-##suavizarBordas(path, path_suavizada, sigma)
-
-##print('Aplicando deteccao de bordas')
-##detectarBordas(path_suavizada, path_bordas, intensidadeP)
-
 print('Aplicando deteccao de bordas')
-detectarBordas(path_suavizada, path_bordas, intensidadeP)
+detectarBordas(path, path_bordas, intensidadeP)
 
 imgBordas = cv.imread(path_bordas, 0)
 
 print('Iniciar contagem de texturas')
-contarAreas(imgBordas);
+totalAreas = contarAreas(imgBordas);
 
-## mostrar imagens
-#cv.imshow('original', imgBordas)
-#cv.imshow('pintada', imgT)
-
-#n,bins,patches = plt.hist(imgT.ravel(), 256, [1, 255])
-#plt.show()
-
-#input("Continuar?")
-
-## print('Aplicando conversao de imagem para Binario')
-## ret, imgT = cv.threshold(imgBordas, 127, 255, cv.THRESH_BINARY)
-##
-#### suavizar ruidos da imagem
-##img = cv.imread(path_suavizada, 0)
-##if (img == None):
-##    suavizarBordas(path, path_suavizada, sigma)
-##else:
-##    opcao = input('A imagem com reducao de ruidos (' + path_suavizada + ') ja existe. Deseja utiliza-la, S|N?').upper()
-##    if (opcao == 'N'):
-##        print('Aplicando suavizacao de ruidos')
-##        suavizarBordas(path, path_suavizada, sigma)
-##        img = cv.imread(path_suavizada, 0)
-##    else:
-##        print('Carregando imagem "' + path_suavizada +'" pre-existente.')
-##
-#### detectar bordas da imagem
-##imgBordas = cv.imread(path_bordas, 0)
-##if (imgBordas == None):
-##    detectarBordas(path_suavizada, path_bordas, intensidadeP)
-##else:
-##    opcao = input('A imagem com deteccao de bordas (' + path_bordas + ') ja existe. Deseja utiliza-la, S|N?').upper()
-##    if (opcao == 'N'):
-##        print('Aplicando deteccao de bordas')
-##        detectarBordas(path_suavizada, path_bordas, intensidadeP)
-##        imgBordas = cv.imread(path_bordas, 0)
-##    else:
-##        print('Carregando imagem "' + path_bordas +'" pre-existente.')
-
-##plt.subplot(2,3,0)
-##plt.imshow(imgT,'gray')
-##plt.title('Imagem binaria')
-##plt.xticks([])
-##plt.yticks([])
-##plt.show()
-
+print ('Total de Areas: '+str(totalAreas))
