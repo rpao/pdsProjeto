@@ -1,14 +1,21 @@
-import math
-import numpy as np
-from scipy.signal import freqz
+from numpy import angle, arange, hamming, spacing
+from math import ceil, log10, pi, sin
+from scipy.signal import freqz, lp2hp
 from matplotlib import pyplot as plt
 
-def ideal_lp(wc, M):
-    ## Ideal low pass filter: wc = cutoff frequency e M = length of the ideal filter
+def ideal_hp(wc, M):
+    ## Filtro Highpass Ideal:
+    ## wc = frequência de corte
+    ## M = comprimento do filtro ideal
+    
     alpha = (M - 1)/2
-    n = np.arange(0,M)
-    m = [item - alpha + np.spacing(1) for item in n]
-    hd = [math.sin(wc*item)/(math.pi*item) for item in m]
+    n = arange(0,M)
+    m = [item - alpha + spacing(1) for item in n]
+
+    ## inversão espectral: inverte todas as amostras
+    ## e soma 1 a amostra central
+    hd = [-sin(wc*item)/(pi*item) for item in m]
+    hd[int(len(hd)/2)] += 1
     return hd
 
 def freqz_m(b, a):
@@ -18,61 +25,81 @@ def freqz_m(b, a):
     w = w[:501]
     mag = abs(H)
     maxMag = max(mag)
-    db = [20*math.log10((item + np.spacing(1))/maxMag) for item in mag]
-    pha = np.angle(H)
+    db = [round(20*log10((item + spacing(1))/maxMag),5) for item in mag]
+    pha = angle(H)
 
     return db, mag, pha, w
 
+def highpassFIR(wp, ws):
+    tr_width = abs(ws - wp)
+
+    ## comprimento do filtro
+    M = ceil(6.6 * pi / tr_width) + 1
+
+    n = arange(0,M)
+
+    wc = (ws + wp)/2
+
+    ## resposta ao impulso
+    hd = ideal_hp(wc, M)
+
+    ## janela de hamming
+    w_ham = hamming(M)
+
+    ## fase linear
+    h = hd*w_ham
+
+    [db, mag, pha, w] = freqz_m(h, [1])
+
+    delta_w = 2*pi/1000;
+
+    ## ondulação na banda de passagem
+    Rp = -(max(db[0:int(abs(wp)/delta_w)+1]))
+
+    ## atenuação na banda de corte em dB
+    As = -round(min(db[int(abs(ws)/delta_w):501]))
+
+    return tr_width, M, n, wc, hd, w_ham, h, db, mag, pha, w, delta_w, Rp, As
+
 ## definição de parâmetros
-wp = 0.2*math.pi
-ws = 0.3*math.pi
+ws = 0.6*pi
+wp = 0.75*pi
 
-tr_width = abs(ws - wp)
+tr_width, M, n, wc, hd, w_ham, h, db, mag, pha, w, delta_w, Rp, As = highpassFIR(wp, ws)
 
-M = math.ceil(6.6 * math.pi / tr_width) + 1
-
-n = np.arange(0,M)
-
-wc = (ws + wp)/2
-
-hd = ideal_lp(wc, M)
-
-w_ham = np.hamming(M)
-
-h = hd*w_ham
-
-[db, mag, pha, w] = freqz_m(h, [1])
-
-delta_w = 2*math.pi/1000;
-indice = int(ws/delta_w)
-Rp = -(min(db[0:indice]))
-As = -(round(max(db[indice:501])))
+print('M = ', M)
+print('alpha = ', (M - 1)/2)
+print('Rp = ', Rp)
+print('As = ', As)
 
 ## mostrar respostas
 plt.figure(1)
-plt.subplot(211)
-plt.plot(n,hd)
+plt.subplot(221)
+plt.plot(hd,'bo')
 plt.title('Resposta ao Impulso Ideal')
 plt.xlabel('n')
 plt.ylabel('hd[n]')
+plt.grid(True)
 
-plt.subplot(212)
-plt.plot(n,w_ham)
+plt.subplot(222)
+plt.plot(w_ham)
 plt.title('Janela de Hamming')
 plt.xlabel('n')
 plt.ylabel('w[n]')
+plt.grid(True)
 
-plt.figure(2)
-plt.subplot(211)
-plt.plot(n,h)
+plt.subplot(223)
+plt.plot(h,'bo')
 plt.title('Resposta ao Impulso Atual')
 plt.xlabel('n')
 plt.ylabel('h[n]')
+plt.grid(True)
 
-plt.subplot(212)
-plt.plot(w/math.pi, db)
+plt.subplot(224)
+plt.plot(w/pi, db)
 plt.title('Magnitude em dB')
 plt.xlabel('frequencia em pi unidades')
 plt.ylabel('Decibeis')
+plt.grid(True)
 
 plt.show()

@@ -127,9 +127,6 @@ def contarAreas(img):
                     totalAreas += 1
             pixelPintado = 5
     return totalAreas
-    
-# https://medium.com/@lucashelal/detec%C3%A7%C3%A3o-e-contagem-da-%C3%A1rea-de-objetos-em-uma-imagem-bin%C3%A1ria-440759a7e034
-# https://medium.com/@enzoftware/how-to-build-amazing-images-filters-with-python-median-filter-sobel-filter-%EF%B8%8F-%EF%B8%8F-22aeb8e2f540
 
 sigma = 1.5
 intensidadeP = 10
@@ -138,7 +135,7 @@ path = 'arquivos/alumgrns.bmp'
 
 
 ## teste sem reducao de ruido
-path_bordas = 'arquivos/alumgrnsBordas.bmp'
+path_bordas = 'arquivos/relatorio/alumgrnsBordas.bmp'
 
 print('Aplicando deteccao de bordas em imagem sem reducao de ruido')
 detectarBordas(path, path_bordas, intensidadeP)
@@ -153,7 +150,7 @@ print ('Total de Areas sem reducao de ruido: '+str(totalAreas))
 ## teste com reducao de ruido
 lista_sigma = [0.5, 1.0, 1.5, 2]
 for sigma in lista_sigma:
-    path_suavizada = 'arquivos/alumgrnsSuave'+str(sigma).replace('.','')+'.bmp'
+    path_suavizada = 'arquivos/relatorio/alumgrnsSuave'+str(sigma).replace('.','')+'.bmp'
     
     print('Aplicando reducao de ruido sigma=',sigma)
     suavizarBordas(path, path_suavizada, sigma)

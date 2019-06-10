@@ -85,5 +85,3 @@ imagemNormalizada1.show()
 
 ## mostrar imagem normalizada - teste 2
 imagemNormalizada2.show()
-
-## https://pythontic.com/image-processing/pillow/contrast%20stretching
